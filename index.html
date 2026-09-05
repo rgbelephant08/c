@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dummy Bank - Welcome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .bank-container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .bank-logo {
+            font-size: 2.5rem;
+            color: #2563eb;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .popup-overlay.active .popup-content {
+            transform: translateY(0);
+        }
+        
+        .popup-icon {
+            font-size: 3rem;
+            color: #10b981;
+            margin-bottom: 1.5rem;
+        }
+        
+        .popup-title {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .popup-message {
+            color: #64748b;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        
+        .popup-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .popup-button:hover {
+            background: #1d4ed8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .bank-container {
+                padding: 1.5rem;
+            }
+            
+            .popup-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bank-container">
+        <div class="bank-logo">🏦</div>
+        <h1>SecureBank</h1>
+        <p>Your trusted financial partner</p>
+        <p>Dummy banking interface for demonstration purposes</p>
+    </div>
+
+    <!-- Welcome Popup -->
+    <div class="popup-overlay" id="welcomePopup">
+        <div class="popup-content">
+            <div class="popup-icon">👋</div>
+            <h2 class="popup-title">Welcome back, customer!</h2>
+            <p class="popup-message">We're glad to see you again. How can we assist you today?</p>
+            <button class="popup-button" id="thanksButton">Thanks</button>
+        </div>
+    </div>
+
+    <script>
+        // Show popup on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const popup = document.getElementById('welcomePopup');
+            const thanksButton = document.getElementById('thanksButton');
+            
+            // Show popup after a slight delay for better UX
+            setTimeout(() => {
+                popup.classList.add('active');
+            }, 300);
+            
+            // Handle button click
+            thanksButton.addEventListener('click', function() {
+                popup.classList.remove('active');
+            });
+            
+            // Optional: Close on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && popup.classList.contains('active')) {
+                    popup.classList.remove('active');
+                }
+            });
+            
+            // Optional: Close when clicking outside popup content
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    popup.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
