@@ -6,25 +6,13 @@
 <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
     body{background:#f5f7fa;min-height:100vh;display:flex;justify-content:center;align-items:center;}
-    .bank-container{text-align:center;padding:2rem;background:#fff;border-radius:12px;
-        box-shadow:0 4px 20px rgba(0,0,0,.08);width:90%;max-width:420px;}
-    .bank-logo{font-size:2.5rem;color:#2563eb;margin-bottom:1.5rem;}
-    h1{color:#1e293b;margin-bottom:1rem;}
-    p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;}
+    .form-wrapper{width:90%;max-width:420px;background:#fff;padding:2rem;border-radius:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,.08);}
+    h1{color:#1e293b;margin-bottom:1rem;text-align:center;}
+    p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;text-align:center;}
 
-    /* ----- Prompt shown before the form ----- */
-    #prompt{text-align:center;margin-top:2rem;}
-    #prompt button{
-        margin-top:1rem;
-        background:#2563eb;color:#fff;border:none;
-        padding:.75rem 1.5rem;border-radius:6px;
-        font-size:1rem;cursor:pointer;
-        transition:background .2s;
-    }
-    #prompt button:hover{background:#1d4ed8;}
-
-    /* ----- Login form (hidden initially) ----- */
-    #loginForm{display:none;text-align:left;margin-top:1.5rem;}
+    /* ----- Login form ----- */
+    #loginForm{text-align:left;}
     .form-group{margin-bottom:1.2rem;}
     .form-group label{display:block;margin-bottom:.4rem;font-weight:500;color:#334155;}
     .form-group input{
@@ -70,31 +58,21 @@
 </head>
 <body>
 
-<div class="bank-container">
-    <div class="bank-logo">🏦</div>
-    <h1>SecureBank</h1>
-    <p>Please sign in to continue</p>
+<div class="form-wrapper">
+    <!-- Login form (visible immediately) -->
+    <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="login-btn">Sign In</button>
+    </form>
+    <div id="formMsg" class="msg"></div>
 </div>
-
-<!-- Prompt before showing the form -->
-<div id="prompt">
-    <p>Click the button below to enter your credentials.</p>
-    <button id="showFormBtn">Proceed to Sign In</button>
-</div>
-
-<!-- Login form (hidden until the prompt button is clicked) -->
-<form id="loginForm" autocomplete="off">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" required>
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" required>
-    </div>
-    <button type="submit" class="login-btn">Sign In</button>
-</form>
-<div id="formMsg" class="msg"></div>
 
 <!-- Error Popup (wrong credentials) -->
 <div class="popup-overlay" id="errorPopup">
@@ -119,12 +97,6 @@
     // ---------- Helpers ----------
     function showPopup(el){ el.classList.add('active'); }
     function hidePopup(el){ el.classList.remove('active'); }
-
-    // ---------- Show form after prompt button ----------
-    document.getElementById('showFormBtn').addEventListener('click',()=>{
-        document.getElementById('prompt').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-    });
 
     // ---------- Form handling ----------
     const form = document.getElementById('loginForm');
