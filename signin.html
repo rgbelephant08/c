@@ -59,7 +59,6 @@
 <body>
 
 <div class="form-wrapper">
-    <!-- Login form (visible immediately) -->
     <form id="loginForm" autocomplete="off">
         <div class="form-group">
             <label for="username">Username</label>
@@ -110,9 +109,9 @@
         const pass = document.getElementById('password').value;
 
         if(user===CORRECT_USER && pass===CORRECT_PASS){
-            // Success → store login state and go back to home
+            // Success → store login state and go to dashboard
             localStorage.setItem(STORAGE_KEY,'true');
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.html';
         }else{
             attempts++;
             formMsg.textContent = `Invalid credentials. Attempt ${attempts}/${MAX_ATTEMPTS}`;
