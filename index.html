@@ -96,9 +96,7 @@
 
         setTimeout(()=>showPopup(welcomePopup),300);
 
-        thanksBtn.addEventListener('click',()=>{
-            hidePopup(welcomePopup);
-        });
+        thanksBtn.addEventListener('click',()=>{ hidePopup(welcomePopup); });
 
         // Optional: close on ESC or clicking outside
         document.addEventListener('keydown',e=>{
@@ -122,11 +120,9 @@
 
         authBtn.addEventListener('click',()=>{
             if(isLoggedIn()){
-                // Log out
                 clearLogin();
                 updateAuthBtn();
             }else{
-                // Go to sign‑in page
                 window.location.href = 'signin.html';
             }
         });
