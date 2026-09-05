@@ -122,10 +122,17 @@
             if(isLoggedIn()){
                 clearLogin();
                 updateAuthBtn();
+                // If you land on index.html while already logged‑in, go to dashboard
+                window.location.href = 'dashboard.html';
             }else{
                 window.location.href = 'signin.html';
             }
         });
+
+        // If the user somehow arrives here already logged in, send them to dashboard
+        if(isLoggedIn()){
+            window.location.href = 'dashboard.html';
+        }
     });
 </script>
 </body>
