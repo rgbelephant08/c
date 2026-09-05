@@ -28,6 +28,8 @@
         text-align:center;color:#64748b;
     }
     main p{font-size:1.2rem;}
+    /* Optional hint for admin */
+    .hint{margin-top:1rem;font-size:.9rem;color:#6b7280;}
 </style>
 </head>
 <body>
@@ -35,30 +37,37 @@
 <header>
     <div class="user-info">
         <span>Welcome, </span><span id="userName">Akhil</span>
-        <span>| Balance: </span><span id="userBalance">$0</span>
+        <span>| Balance: </span><span id="userBalance">$0.00</span>
     </div>
     <button id="logoutBtn">Log Out</button>
 </header>
 
 <main>
     <p>This is your dashboard. You can add more banking features here.</p>
+    <p class="hint">(Balance can be changed via the admin page.)</p>
 </main>
 
 <script>
     // ---------- Helpers ----------
-    const STORAGE_KEY = 'sbLoggedIn';
+    const STORAGE_KEY   = 'sbLoggedIn';
+    const BALANCE_KEY   = 'sbBalance';
     function isLoggedIn(){ return localStorage.getItem(STORAGE_KEY) === 'true'; }
     function clearLogin(){ localStorage.removeItem(STORAGE_KEY); }
 
-    // If for some reason the user lands here without being logged in, send them back
+    // If for some reason the user lands here without being logged in, send them back to home
     if(!isLoggedIn()){
-        window.location.href = 'index.html';
+        window.location.href = 'home.html';
     }
+
+    // Load balance (default 0 if not set)
+    const balRaw = localStorage.getItem(BALANCE_KEY);
+    const balance = balRaw !== null ? parseFloat(balRaw) : 0;
+    document.getElementById('userBalance').textContent = `$${balance.toFixed(2)}`;
 
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click',()=>{
         clearLogin();
-        window.location.href = 'index.html';
+        window.location.href = 'home.html';
     });
 </script>
 </body>
