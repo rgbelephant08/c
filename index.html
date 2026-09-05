@@ -1,183 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dummy Bank - Welcome</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .bank-container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            width: 90%;
-            max-width: 400px;
-        }
-        
-        .bank-logo {
-            font-size: 2.5rem;
-            color: #2563eb;
-            margin-bottom: 1.5rem;
-        }
-        
-        h1 {
-            color: #1e293b;
-            margin-bottom: 1rem;
-        }
-        
-        p {
-            color: #64748b;
-            line-height: 1.6;
-        }
-        
-        /* Popup Styles */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        
-        .popup-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .popup-content {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            text-align: center;
-            width: 90%;
-            max-width: 320px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
-        
-        .popup-overlay.active .popup-content {
-            transform: translateY(0);
-        }
-        
-        .popup-icon {
-            font-size: 3rem;
-            color: #10b981;
-            margin-bottom: 1.5rem;
-        }
-        
-        .popup-title {
-            font-size: 1.25rem;
-            color: #1e293b;
-            margin-bottom: 1rem;
-        }
-        
-        .popup-message {
-            color: #64748b;
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-        
-        .popup-button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            font-weight: 500;
-        }
-        
-        .popup-button:hover {
-            background: #1d4ed8;
-        }
-        
-        /* Responsive */
-        @media (max-width: 480px) {
-            .bank-container {
-                padding: 1.5rem;
-            }
-            
-            .popup-content {
-                padding: 2rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Dummy Bank – Login Demo</title>
+<style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+    body{background:#f5f7fa;min-height:100vh;display:flex;justify-content:center;align-items:center;}
+    .bank-container{text-align:center;padding:2rem;background:#fff;border-radius:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,.08);width:90%;max-width:420px;}
+    .bank-logo{font-size:2.5rem;color:#2563eb;margin-bottom:1.5rem;}
+    h1{color:#1e293b;margin-bottom:1rem;}
+    p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;}
+
+    /* ----- Popup overlay ----- */
+    .popup-overlay{
+        position:fixed;inset:0;background:rgba(0,0,0,.5);
+        display:flex;justify-content:center;align-items:center;
+        z-index:1000;opacity:0;visibility:hidden;
+        transition:opacity .3s ease,visibility .3s ease;
+    }
+    .popup-overlay.active{opacity:1;visibility:visible;}
+    .popup-content{
+        background:#fff;padding:2.5rem;border-radius:16px;
+        text-align:center;width:90%;max-width:340px;
+        box-shadow:0 10px 25px rgba(0,0,0,.15);
+        transform:translateY(-20px);transition:transform .3s ease;
+    }
+    .popup-overlay.active .popup-content{transform:translateY(0);}
+    .popup-icon{font-size:3rem;color:#10b981;margin-bottom:1.5rem;}
+    .popup-title{font-size:1.25rem;color:#1e293b;margin-bottom:1rem;}
+    .popup-message{color:#64748b;margin-bottom:2rem;line-height:1.5;}
+    .popup-btn{
+        background:#2563eb;color:#fff;border:none;padding:.75rem 2rem;
+        border-radius:8px;font-size:1rem;cursor:pointer;
+        transition:background .2s ease;font-weight:500;
+    }
+    .popup-btn:hover{background:#1d4ed8;}
+
+    /* ----- Login form ----- */
+    #loginForm{display:none;text-align:left;}
+    .form-group{margin-bottom:1.2rem;}
+    .form-group label{display:block;margin-bottom:.4rem;font-weight:500;color:#334155;}
+    .form-group input{
+        width:100%;padding:.75rem 1rem;border:1px solid #cbd5e1;
+        border-radius:6px;font-size:1rem;transition:border-color .2s;
+    }
+    .form-group input:focus{border-color:#2563eb;outline:none;}
+    .login-btn{
+        width:100%;background:#10b981;color:#fff;border:none;
+        padding:.85rem;border-radius:6px;font-size:1rem;
+        cursor:pointer;transition:background .2s;
+    }
+    .login-btn:hover{background:#059669;}
+    .msg{margin-top:1rem;padding:.75rem;border-radius:6px;text-align:center;font-weight:500;}
+    .msg.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
+    .msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+
+    /* ----- Responsive ----- */
+    @media(max-width:480px){
+        .bank-container{padding:1.5rem;}
+        .popup-content{padding:2rem;}
+    }
+</style>
 </head>
 <body>
-    <div class="bank-container">
-        <div class="bank-logo">🏦</div>
-        <h1>SecureBank</h1>
-        <p>Your trusted financial partner</p>
-        <p>Dummy banking interface for demonstration purposes</p>
-    </div>
 
-    <!-- Welcome Popup -->
-    <div class="popup-overlay" id="welcomePopup">
-        <div class="popup-content">
-            <div class="popup-icon">👋</div>
-            <h2 class="popup-title">Welcome back, customer!</h2>
-            <p class="popup-message">We're glad to see you again. How can we assist you today?</p>
-            <button class="popup-button" id="thanksButton">Thanks</button>
+<div class="bank-container">
+    <div class="bank-logo">🏦</div>
+    <h1>SecureBank</h1>
+    <p>Your trusted financial partner</p>
+    <p>Dummy banking interface for demonstration purposes</p>
+</div>
+
+<!-- Welcome Popup -->
+<div class="popup-overlay" id="welcomePopup">
+    <div class="popup-content">
+        <div class="popup-icon">👋</div>
+        <h2 class="popup-title">Welcome back, customer!</h2>
+        <p class="popup-message">We're glad to see you again. How can we assist you today?</p>
+        <button class="popup-btn" id="thanksBtn">Thanks</button>
+    </div>
+</div>
+
+<!-- Login Form (hidden initially) -->
+<div id="loginForm">
+    <h2 style="text-align:center;color:#1e293b;margin-bottom:1.5rem;">Sign In</h2>
+    <form id="signinForm">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" required>
         </div>
-    </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="login-btn">Sign In</button>
+    </form>
+    <div id="formMsg" class="msg"></div>
+</div>
 
-    <script>
-        // Show popup on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const popup = document.getElementById('welcomePopup');
-            const thanksButton = document.getElementById('thanksButton');
-            
-            // Show popup after a slight delay for better UX
-            setTimeout(() => {
-                popup.classList.add('active');
-            }, 300);
-            
-            // Handle button click
-            thanksButton.addEventListener('click', function() {
-                popup.classList.remove('active');
-            });
-            
-            // Optional: Close on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && popup.classList.contains('active')) {
-                    popup.classList.remove('active');
-                }
-            });
-            
-            // Optional: Close when clicking outside popup content
-            popup.addEventListener('click', function(e) {
-                if (e.target === popup) {
-                    popup.classList.remove('active');
-                }
-            });
+<!-- Error Popup (for wrong credentials) -->
+<div class="popup-overlay" id="errorPopup">
+    <div class="popup-content">
+        <div class="popup-icon">⚠️</div>
+        <h2 class="popup-title">Wrong credentials</h2>
+        <p class="popup-message">Please check your username and password and try again.</p>
+        <button class="popup-btn" id="errorOkay">Okay</button>
+    </div>
+</div>
+
+<!-- Security lockout message (shown after 3 failed attempts) -->
+<div id="lockoutMsg" style="display:none;text-align:center;margin-top:1.5rem;
+    color:#991b1b;font-weight:500;">
+    Kindly login after sometime due to security reasons.
+</div>
+
+<script>
+    // ---------- State ----------
+    let attempts = 0;
+    const MAX_ATTEMPTS = 3;
+    const CORRECT_USER = 'Akhil';
+    const CORRECT_PASS = '0606';
+
+    // ---------- Helper functions ----------
+    function showPopup(el){ el.classList.add('active'); }
+    function hidePopup(el){ el.classList.remove('active'); }
+
+    // ---------- Welcome popup ----------
+    document.addEventListener('DOMContentLoaded',()=>{
+        const welcomePopup = document.getElementById('welcomePopup');
+        const thanksBtn    = document.getElementById('thanksBtn');
+        setTimeout(()=>showPopup(welcomePopup),300);
+
+        thanksBtn.addEventListener('click',()=>{
+            hidePopup(welcomePopup);
+            document.getElementById('loginForm').style.display = 'block';
         });
-    </script>
+
+        // Optional: close on ESC or outside click
+        document.addEventListener('keydown',e=>{
+            if(e.key==='Escape'){
+                [welcomePopup,errorPopup].forEach(p=>hidePopup(p));
+            }
+        });
+        welcomePopup.addEventListener('click',e=>{ if(e.target===welcomePopup) hidePopup(welcomePopup); });
+    });
+
+    // ---------- Login form ----------
+    const signinForm = document.getElementById('signinForm');
+    const formMsg    = document.getElementById('formMsg');
+    const errorPopup = document.getElementById('errorPopup');
+    const errorOkay  = document.getElementById('errorOkay');
+    const lockoutMsg = document.getElementById('lockoutMsg');
+
+    signinForm.addEventListener('submit',e=>{
+        e.preventDefault();
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value;
+
+        if(user===CORRECT_USER && pass===CORRECT_PASS){
+            formMsg.textContent = 'Login successful!';
+            formMsg.className = 'msg success';
+            // Disable further attempts
+            signinForm.reset();
+            signinForm.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+            lockoutMsg.style.display = 'none';
+        }else{
+            attempts++;
+            formMsg.textContent = `Invalid credentials. Attempt ${attempts}/${MAX_ATTEMPTS}`;
+            formMsg.className = 'msg error';
+
+            if(attempts >= MAX_ATTEMPTS){
+                // Lockout
+                signinForm.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+                lockoutMsg.style.display = 'block';
+                formMsg.textContent = 'Maximum attempts reached.';
+            }else{
+                showPopup(errorPopup);
+            }
+        }
+    });
+
+    errorOkay.addEventListener('click',()=>{
+        hidePopup(errorPopup);
+        // clear fields for next try
+        signinForm.reset();
+    });
+
+    // Optional: close error popup on ESC/outside click
+    document.addEventListener('keydown',e=>{
+        if(e.key==='Escape') hidePopup(errorPopup);
+    });
+    errorPopup.addEventListener('click',e=>{ if(e.target===errorPopup) hidePopup(errorPopup); });
+</script>
+
 </body>
 </html>
