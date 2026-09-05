@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dummy Bank – Login Demo</title>
+<title>SecureBank – Home</title>
 <style>
-    * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
     body{background:#f5f7fa;min-height:100vh;display:flex;justify-content:center;align-items:center;}
     .bank-container{text-align:center;padding:2rem;background:#fff;border-radius:12px;
         box-shadow:0 4px 20px rgba(0,0,0,.08);width:90%;max-width:420px;}
@@ -12,7 +12,19 @@
     h1{color:#1e293b;margin-bottom:1rem;}
     p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;}
 
-    /* ----- Popup overlay ----- */
+    /* ----- Top‑right auth button ----- */
+    #authBtn{
+        position:fixed;top:1rem;right:1rem;
+        padding:.5rem 1rem;border:none;border-radius:6px;
+        font-size:1rem;cursor:pointer;transition:background .2s;
+        color:#fff;
+    }
+    #authBtn.sign-in{background:#2563eb;}
+    #authBtn.sign-in:hover{background:#1d4ed8;}
+    #authBtn.log-out{background:#dc2626;}
+    #authBtn.log-out:hover{background:#b91c1c;}
+
+    /* ----- Popup overlay (welcome & error) ----- */
     .popup-overlay{
         position:fixed;inset:0;background:rgba(0,0,0,.5);
         display:flex;justify-content:center;align-items:center;
@@ -36,26 +48,6 @@
         transition:background .2s ease;font-weight:500;
     }
     .popup-btn:hover{background:#1d4ed8;}
-
-    /* ----- Login form ----- */
-    #loginForm{display:none;text-align:left;}
-    .form-group{margin-bottom:1.2rem;}
-    .form-group label{display:block;margin-bottom:.4rem;font-weight:500;color:#334155;}
-    .form-group input{
-        width:100%;padding:.75rem 1rem;border:1px solid #cbd5e1;
-        border-radius:6px;font-size:1rem;transition:border-color .2s;
-    }
-    .form-group input:focus{border-color:#2563eb;outline:none;}
-    .login-btn{
-        width:100%;background:#10b981;color:#fff;border:none;
-        padding:.85rem;border-radius:6px;font-size:1rem;
-        cursor:pointer;transition:background .2s;
-    }
-    .login-btn:hover{background:#059669;}
-    .msg{margin-top:1rem;padding:.75rem;border-radius:6px;text-align:center;font-weight:500;}
-    .msg.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
-    .msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
-
     /* ----- Responsive ----- */
     @media(max-width:480px){
         .bank-container{padding:1.5rem;}
@@ -64,6 +56,9 @@
 </style>
 </head>
 <body>
+
+<!-- Top‑right auth button -->
+<button id="authBtn" class="sign-in">Sign In</button>
 
 <div class="bank-container">
     <div class="bank-logo">🏦</div>
@@ -82,47 +77,14 @@
     </div>
 </div>
 
-<!-- Login Form (hidden initially) -->
-<div id="loginForm">
-    <h2 style="text-align:center;color:#1e293b;margin-bottom:1.5rem;">Sign In</h2>
-    <form id="signinForm">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" autocomplete="username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" autocomplete="current-password" required>
-        </div>
-        <button type="submit" class="login-btn">Sign In</button>
-    </form>
-    <div id="formMsg" class="msg"></div>
-</div>
-
-<!-- Error Popup (for wrong credentials) -->
-<div class="popup-overlay" id="errorPopup">
-    <div class="popup-content">
-        <div class="popup-icon">⚠️</div>
-        <h2 class="popup-title">Wrong credentials</h2>
-        <p class="popup-message">Please check your username and password and try again.</p>
-        <button class="popup-btn" id="errorOkay">Okay</button>
-    </div>
-</div>
-
-<!-- Security lockout message (shown after 3 failed attempts) -->
-<div id="lockoutMsg" style="display:none;text-align:center;margin-top:1.5rem;
-    color:#991b1b;font-weight:500;">
-    Kindly login after sometime due to security reasons.
-</div>
-
 <script>
-    // ---------- State ----------
-    let attempts = 0;
-    const MAX_ATTEMPTS = 3;
-    const CORRECT_USER = 'Akhil';
-    const CORRECT_PASS = '0606';
+    // ---------- State helpers ----------
+    const STORAGE_KEY = 'sbLoggedIn';
+    function isLoggedIn(){ return localStorage.getItem(STORAGE_KEY) === 'true'; }
+    function setLoggedIn(v){ localStorage.setItem(STORAGE_KEY, v); }
+    function clearLogin(){ localStorage.removeItem(STORAGE_KEY); }
 
-    // ---------- Helper functions ----------
+    // ---------- Popup helpers ----------
     function showPopup(el){ el.classList.add('active'); }
     function hidePopup(el){ el.classList.remove('active'); }
 
@@ -130,69 +92,45 @@
     document.addEventListener('DOMContentLoaded',()=>{
         const welcomePopup = document.getElementById('welcomePopup');
         const thanksBtn    = document.getElementById('thanksBtn');
+        const authBtn      = document.getElementById('authBtn');
+
         setTimeout(()=>showPopup(welcomePopup),300);
 
         thanksBtn.addEventListener('click',()=>{
             hidePopup(welcomePopup);
-            document.getElementById('loginForm').style.display = 'block';
         });
 
-        // Optional: close on ESC or outside click
+        // Optional: close on ESC or clicking outside
         document.addEventListener('keydown',e=>{
             if(e.key==='Escape'){
-                [welcomePopup,errorPopup].forEach(p=>hidePopup(p));
+                [welcomePopup].forEach(p=>hidePopup(p));
             }
         });
         welcomePopup.addEventListener('click',e=>{ if(e.target===welcomePopup) hidePopup(welcomePopup); });
-    });
 
-    // ---------- Login form ----------
-    const signinForm = document.getElementById('signinForm');
-    const formMsg    = document.getElementById('formMsg');
-    const errorPopup = document.getElementById('errorPopup');
-    const errorOkay  = document.getElementById('errorOkay');
-    const lockoutMsg = document.getElementById('lockoutMsg');
-
-    signinForm.addEventListener('submit',e=>{
-        e.preventDefault();
-        const user = document.getElementById('username').value.trim();
-        const pass = document.getElementById('password').value;
-
-        if(user===CORRECT_USER && pass===CORRECT_PASS){
-            formMsg.textContent = 'Login successful!';
-            formMsg.className = 'msg success';
-            // Disable further attempts
-            signinForm.reset();
-            signinForm.querySelectorAll('input,button').forEach(el=>el.disabled=true);
-            lockoutMsg.style.display = 'none';
-        }else{
-            attempts++;
-            formMsg.textContent = `Invalid credentials. Attempt ${attempts}/${MAX_ATTEMPTS}`;
-            formMsg.className = 'msg error';
-
-            if(attempts >= MAX_ATTEMPTS){
-                // Lockout
-                signinForm.querySelectorAll('input,button').forEach(el=>el.disabled=true);
-                lockoutMsg.style.display = 'block';
-                formMsg.textContent = 'Maximum attempts reached.';
+        // ---------- Auth button logic ----------
+        function updateAuthBtn(){
+            if(isLoggedIn()){
+                authBtn.textContent = 'Log Out';
+                authBtn.className = 'log-out';
             }else{
-                showPopup(errorPopup);
+                authBtn.textContent = 'Sign In';
+                authBtn.className = 'sign-in';
             }
         }
-    });
+        updateAuthBtn();
 
-    errorOkay.addEventListener('click',()=>{
-        hidePopup(errorPopup);
-        // clear fields for next try
-        signinForm.reset();
+        authBtn.addEventListener('click',()=>{
+            if(isLoggedIn()){
+                // Log out
+                clearLogin();
+                updateAuthBtn();
+            }else{
+                // Go to sign‑in page
+                window.location.href = 'signin.html';
+            }
+        });
     });
-
-    // Optional: close error popup on ESC/outside click
-    document.addEventListener('keydown',e=>{
-        if(e.key==='Escape') hidePopup(errorPopup);
-    });
-    errorPopup.addEventListener('click',e=>{ if(e.target===errorPopup) hidePopup(errorPopup); });
 </script>
-
 </body>
 </html>
