@@ -10,8 +10,6 @@
         box-shadow:0 4px 20px rgba(0,0,0,.08);}
     h1{color:#1e293b;margin-bottom:1rem;text-align:center;}
     p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;text-align:center;}
-
-    /* ----- Login form ----- */
     #loginForm{text-align:left;}
     .form-group{margin-bottom:1.2rem;}
     .form-group label{display:block;margin-bottom:.4rem;font-weight:500;color:#334155;}
@@ -29,8 +27,15 @@
     .msg{margin-top:1rem;padding:.75rem;border-radius:6px;text-align:center;font-weight:500;}
     .msg.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
     .msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
-
-    /* ----- Popup overlay (error) ----- */
+    .create-link{
+        margin-top:1rem;
+        display:inline-block;
+        color:#2563eb;
+        text-decoration:none;
+        font-weight:500;
+    }
+    .create-link:hover{text-decoration:underline;}
+    /* Popup overlay (error) */
     .popup-overlay{
         position:fixed;inset:0;background:rgba(0,0,0,.5);
         display:flex;justify-content:center;align-items:center;
@@ -54,6 +59,9 @@
         transition:background .2s ease;font-weight:500;
     }
     .popup-btn:hover{background:#b91c1c;}
+    @media(max-width:480px){
+        .form-wrapper{padding:1.5rem;}
+    }
 </style>
 </head>
 <body>
@@ -71,6 +79,7 @@
         <button type="submit" class="login-btn">Sign In</button>
     </form>
     <div id="formMsg" class="msg"></div>
+    <p>Don’t have an account? <a href="create_account.html" class="create-link">Create new account</a></p>
 </div>
 
 <!-- Error Popup (wrong credentials) -->
@@ -84,18 +93,39 @@
 </div>
 
 <script>
-    // ---------- Constants ----------
+    // ---------- Storage keys ----------
+    const ACCOUNTS_KEY = 'sbAccounts';
+    const BALANCES_KEY = 'sbUserBalances';
+    const LOGGED_KEY   = 'sbLoggedIn';
+    const CURRENT_KEY  = 'sbCurrentUser';
     const MAX_ATTEMPTS = 3;
-    const CORRECT_USER = 'Akhil';
-    const CORRECT_PASS = '0606';
-    const STORAGE_KEY  = 'sbLoggedIn';
+
+    // ---------- Helpers ----------
+    function getAccounts(){
+        const raw = localStorage.getItem(ACCOUNTS_KEY);
+        if(!raw){
+            // default Akhil account
+            const def = [{username:'Akhil',password:'0606',name:'Akhil',age:25}];
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(def));
+            return def;
+        }
+        return JSON.parse(raw);
+    }
+    function saveAccounts(arr){ localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(arr)); }
+    function getBalances(){
+        const raw = localStorage.getItem(BALANCES_KEY);
+        return raw ? JSON.parse(raw) : {};
+    }
+    function saveBalances(obj){ localStorage.setItem(BALANCES_KEY, JSON.stringify(obj)); }
+    function showPopup(el){ el.classList.add('active'); }
+    function hidePopup(el){ el.classList.remove('active'); }
+    function showMsg(el, text, isSuccess){
+        el.textContent = text;
+        el.className = 'msg ' + (isSuccess ? 'success' : 'error');
+    }
 
     // ---------- State ----------
     let attempts = 0;
-
-    // ---------- Helpers ----------
-    function showPopup(el){ el.classList.add('active'); }
-    function hidePopup(el){ el.classList.remove('active'); }
 
     // ---------- Form handling ----------
     const form = document.getElementById('loginForm');
@@ -108,19 +138,20 @@
         const user = document.getElementById('username').value.trim();
         const pass = document.getElementById('password').value;
 
-        if(user===CORRECT_USER && pass===CORRECT_PASS){
-            // Success → store login state and go to dashboard
-            localStorage.setItem(STORAGE_KEY,'true');
+        const accounts = getAccounts();
+        const acc = accounts.find(a=>a.username===user && a.password===pass);
+        if(acc){
+            // successful login
+            localStorage.setItem(LOGGED_KEY,'true');
+            localStorage.setItem(CURRENT_KEY, user);
             window.location.href = 'dashboard.html';
         }else{
             attempts++;
-            formMsg.textContent = `Invalid credentials. Attempt ${attempts}/${MAX_ATTEMPTS}`;
-            formMsg.className = 'msg error';
-
+            showMsg(formMsg, `Invalid credentials. Attempt ${attempts}/${MAX_ATTEMPTS}`, false);
             if(attempts >= MAX_ATTEMPTS){
-                // Lockout
+                // lockout
                 form.querySelectorAll('input,button').forEach(el=>el.disabled=true);
-                formMsg.textContent = 'Maximum attempts reached. Kindly login after sometime due to security reasons.';
+                showMsg(formMsg, 'Maximum attempts reached. Kindly login after sometime due to security reasons.', false);
             }else{
                 showPopup(errorPopup);
             }
@@ -129,10 +160,8 @@
 
     errorOkay.addEventListener('click',()=>{
         hidePopup(errorPopup);
-        form.reset(); // clear fields for next try
+        form.reset();
     });
-
-    // Optional: close error popup on ESC or clicking outside
     document.addEventListener('keydown',e=>{
         if(e.key==='Escape') hidePopup(errorPopup);
     });
