@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -45,29 +45,40 @@
 </main>
 
 <script>
-    const LOGGED_KEY = 'sbLoggedIn';
-    const CURRENT_KEY = 'sbCurrentUser';
+    // Storage keys used throughout the demo
+    const LOGGED_KEY   = 'sbLoggedIn';
+    const CURRENT_KEY  = 'sbCurrentUser';
     const BALANCES_KEY = 'sbUserBalances';
 
+    // Helper functions
     function isLoggedIn(){ return localStorage.getItem(LOGGED_KEY) === 'true'; }
-    function clearLogin(){ localStorage.removeItem(LOGGED_KEY); localStorage.removeItem(CURRENT_KEY); }
-
-    // If not logged in, go home
-    if(!isLoggedIn()){
-        window.location.href = 'home.html';
-        return;
+    function clearLogin(){
+        localStorage.removeItem(LOGGED_KEY);
+        localStorage.removeItem(CURRENT_KEY);
     }
 
-    const username = localStorage.getItem(CURRENT_KEY);
-    const balances = JSON.parse(localStorage.getItem(BALANCES_KEY)||'{}');
-    const balance = typeof balances[username] === 'number' ? balances[username] : 0;
+    // Run after the DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        // If the user isn’t logged in, send them home
+        if (!isLoggedIn()) {
+            window.location.href = 'home.html';
+            return;
+        }
 
-    document.getElementById('userName').textContent = username;
-    document.getElementById('userBalance').textContent = `$${balance.toFixed(2)}`;
+        // Populate welcome info
+        const username = localStorage.getItem(CURRENT_KEY);
+        const balances = JSON.parse(localStorage.getItem(BALANCES_KEY) || '{}');
+        const balance  = typeof balances[username] === 'number' ? balances[username] : 0;
 
-    document.getElementById('logoutBtn').addEventListener('click',()=>{
-        clearLogin();
-        window.location.href = 'home.html';
+        document.getElementById('userName').textContent = username;
+        document.getElementById('userBalance').textContent = `$${balance.toFixed(2)}`;
+
+        // Log‑out button handler
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.addEventListener('click', () => {
+            clearLogin();               // remove login flag & current user
+            window.location.href = 'home.html';
+        });
     });
 </script>
 </body>
