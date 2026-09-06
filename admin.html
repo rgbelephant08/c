@@ -2,20 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SecureBank – Admin – Change Balance</title>
+<title>SecureBank – Admin</title>
 <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
     body{background:#f5f7fa;min-height:100vh;display:flex;justify-content:center;align-items:center;}
-    .admin-wrapper{width:90%;max-width:420px;background:#fff;padding:2rem;border-radius:12px;
+    .admin-wrapper{width:90%;max-width:600px;background:#fff;padding:2rem;border-radius:12px;
         box-shadow:0 4px 20px rgba(0,0,0,.08);}
     h1{color:#1e293b;margin-bottom:1.5rem;text-align:center;}
-    .form-group{margin-bottom:1.2rem;}
+    .form-group{margin-bottom:1rem;}
     .form-group label{display:block;margin-bottom:.4rem;font-weight:500;color:#334155;}
-    .form-group input{
+    .form-group input,
+    .form-group select{
         width:100%;padding:.75rem 1rem;border:1px solid #cbd5e1;
         border-radius:6px;font-size:1rem;transition:border-color .2s;
     }
-    .form-group input:focus{border-color:#2563eb;outline:none;}
+    .form-group input:focus,
+    .form-group select:focus{border-color:#2563eb;outline:none;}
     .update-btn{
         width:100%;background:#10b981;color:#fff;border:none;
         padding:.85rem;border-radius:6px;font-size:1rem;
@@ -25,59 +27,90 @@
     .msg{margin-top:1rem;padding:.75rem;border-radius:6px;text-align:center;font-weight:500;}
     .msg.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
     .msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+    table{width:100%;border-collapse:collapse;margin-top:1.5rem;}
+    th,td{padding:.75rem 1rem;border:1px solid #e2e8f0;text-align:left;}
+    th{background:#f1f5f9;}
+    tr:hover td{background:#f8fafc;}
+    @media(max-width:480px){
+        .admin-wrapper{padding:1.5rem;}
+    }
 </style>
 </head>
 <body>
 
 <div class="admin-wrapper">
-    <h1>Admin – Update Akhil’s Balance</h1>
-
-    <div class="form-group">
-        <label for="newBalance">New Balance (USD)</label>
-        <input type="number" id="newBalance" step="0.01" min="0" placeholder="e.g. 1250.50" required>
+    <!-- Admin login form (shown first) -->
+    <div id="loginForm">
+        <h1>Admin Login</h1>
+        <div class="form-group">
+            <label for="adminUser">Username</label>
+            <input type="text" id="adminUser" placeholder="admin" required>
+        </div>
+        <div class="form-group">
+            <label for="adminPass">Password</label>
+            <input type="password" id="adminPass" placeholder="123" required>
+        </div>
+        <button type="submit" class="update-btn" id="adminLoginBtn">Login</button>
     </div>
 
-    <button class="update-btn" id="updateBtn">Update Balance</button>
-    <div id="adminMsg" class="msg"></div>
+    <!-- Admin UI (hidden until login succeeds) -->
+    <div id="adminUI" style="display:none;">
+        <h1>Admin – Accounts Overview</h1>
 
-    <p class="hint" style="margin-top:1.5rem;font-size:.9rem;color:#6b7280;">
-        Current balance stored: <span id="currentBal">$0.00</span>
-    </p>
+        <!-- Balance change section -->
+        <div class="form-group">
+            <label for="userSelect">Select User</label>
+            <select id="userSelect"></select>
+        </div>
+        <div class="form-group">
+            <label for="newBal">New Balance (USD)</label>
+            <input type="number" id="newBal" step="0.01" min="0" placeholder="e.g. 1250.50" required>
+        </div>
+        <button class="update-btn" id="changeBalBtn">Update Balance</button>
+        <div id="adminMsg" class="msg"></div>
+
+        <hr style="margin:2rem 0;">
+
+        <!-- Accounts table -->
+        <table id="accountsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Username</th>
+                    <th>Balance (USD)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Error popup (wrong credentials) -->
+<div class="popup-overlay" id="errorPopup">
+    <div class="popup-content">
+        <div class="popup-icon">⚠️</div>
+        <h2 class="popup-title">Wrong credentials</h2>
+        <p class="popup-message">Please check your username and password and try again.</p>
+        <button class="popup-btn" id="errorOkay">Okay</button>
+    </div>
 </div>
 
 <script>
-    const BALANCE_KEY = 'sbBalance';
+    const ACCOUNTS_KEY = 'sbAccounts';
+    const BALANCES_KEY = 'sbUserBalances';
+    const ADMIN_USER = 'admin';
+    const ADMIN_PASS = '123';
+    const MAX_ATTEMPTS = 3;
 
-    // Show current balance on page load
-    const cur = localStorage.getItem(BALANCE_KEY);
-    const curBal = cur !== null ? parseFloat(cur) : 0;
-    document.getElementById('currentBal').textContent = `$${curBal.toFixed(2)}`;
-
-    document.getElementById('updateBtn').addEventListener('click',()=>{
-        const input = document.getElementById('newBalance');
-        const valStr = input.value.trim();
-        if(valStr === ''){
-            showMsg('Please enter a value.',false);
-            return;
+    // ---------- Helpers ----------
+    function getAccounts(){
+        const raw = localStorage.getItem(ACCOUNTS_KEY);
+        if(!raw){
+            const def = [{username:'Akhil',password:'0606',name:'Akhil',age:25}];
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(def));
+            return def;
         }
-        const val = parseFloat(valStr);
-        if(isNaN(val) || val < 0){
-            showMsg('Please enter a valid non‑negative number.',false);
-            return;
-        }
-        // Store balance
-        localStorage.setItem(BALANCE_KEY, val);
-        showMsg('Balance updated successfully!',true);
-        // Update the displayed current balance
-        document.getElementById('currentBal').textContent = `$${val.toFixed(2)}`;
-        input.value = ''; // clear field
-    });
-
-    function showMsg(text, isSuccess){
-        const msg = document.getElementById('adminMsg');
-        msg.textContent = text;
-        msg.className = 'msg ' + (isSuccess ? 'success' : 'error');
+        return JSON.parse(raw);
     }
-</script>
-</body>
-</html>
+    function saveAccounts(arr){ localStorage
