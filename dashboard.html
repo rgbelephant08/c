@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,20 +15,17 @@
         font-size:1.1rem;color:#1e293b;
     }
     .user-info span{font-weight:600;}
-    /* Logout button – same red style as before */
     #logoutBtn{
         background:#dc2626;color:#fff;border:none;
         padding:.5rem 1rem;border-radius:6px;font-size:1rem;
         cursor:pointer;transition:background .2s;
     }
     #logoutBtn:hover{background:#b91c1c;}
-
     main{
         flex:1;display:flex;justify-content:center;align-items:center;
         text-align:center;color:#64748b;
     }
     main p{font-size:1.2rem;}
-    /* Optional hint for admin */
     .hint{margin-top:1rem;font-size:.9rem;color:#6b7280;}
 </style>
 </head>
@@ -36,7 +33,7 @@
 
 <header>
     <div class="user-info">
-        <span>Welcome, </span><span id="userName">Akhil</span>
+        <span>Welcome, </span><span id="userName"></span>
         <span>| Balance: </span><span id="userBalance">$0.00</span>
     </div>
     <button id="logoutBtn">Log Out</button>
@@ -48,23 +45,26 @@
 </main>
 
 <script>
-    // ---------- Helpers ----------
-    const STORAGE_KEY   = 'sbLoggedIn';
-    const BALANCE_KEY   = 'sbBalance';
-    function isLoggedIn(){ return localStorage.getItem(STORAGE_KEY) === 'true'; }
-    function clearLogin(){ localStorage.removeItem(STORAGE_KEY); }
+    const LOGGED_KEY = 'sbLoggedIn';
+    const CURRENT_KEY = 'sbCurrentUser';
+    const BALANCES_KEY = 'sbUserBalances';
 
-    // If for some reason the user lands here without being logged in, send them back to home
+    function isLoggedIn(){ return localStorage.getItem(LOGGED_KEY) === 'true'; }
+    function clearLogin(){ localStorage.removeItem(LOGGED_KEY); localStorage.removeItem(CURRENT_KEY); }
+
+    // If not logged in, go home
     if(!isLoggedIn()){
         window.location.href = 'home.html';
+        return;
     }
 
-    // Load balance (default 0 if not set)
-    const balRaw = localStorage.getItem(BALANCE_KEY);
-    const balance = balRaw !== null ? parseFloat(balRaw) : 0;
+    const username = localStorage.getItem(CURRENT_KEY);
+    const balances = JSON.parse(localStorage.getItem(BALANCES_KEY)||'{}');
+    const balance = typeof balances[username] === 'number' ? balances[username] : 0;
+
+    document.getElementById('userName').textContent = username;
     document.getElementById('userBalance').textContent = `$${balance.toFixed(2)}`;
 
-    // Logout button
     document.getElementById('logoutBtn').addEventListener('click',()=>{
         clearLogin();
         window.location.href = 'home.html';
