@@ -34,6 +34,30 @@
     @media(max-width:480px){
         .admin-wrapper{padding:1.5rem;}
     }
+    /* Popup overlay (error) */
+    .popup-overlay{
+        position:fixed;inset:0;background:rgba(0,0,0,.5);
+        display:flex;justify-content:center;align-items:center;
+        z-index:1000;opacity:0;visibility:hidden;
+        transition:opacity .3s ease,visibility .3s ease;
+    }
+    .popup-overlay.active{opacity:1;visibility:visible;}
+    .popup-content{
+        background:#fff;padding:2rem;border-radius:16px;
+        text-align:center;width:90%;max-width:340px;
+        box-shadow:0 10px 25px rgba(0,0,0,.15);
+        transform:translateY(-20px);transition:transform .3s ease;
+    }
+    .popup-overlay.active .popup-content{transform:translateY(0);}
+    .popup-icon{font-size:3rem;color:#ef4444;margin-bottom:1.5rem;}
+    .popup-title{font-size:1.25rem;color:#1e293b;margin-bottom:1rem;}
+    .popup-message{color:#64748b;margin-bottom:2rem;line-height:1.5;}
+    .popup-btn{
+        background:#dc2626;color:#fff;border:none;padding:.75rem 2rem;
+        border-radius:8px;font-size:1rem;cursor:pointer;
+        transition:background .2s ease;font-weight:500;
+    }
+    .popup-btn:hover{background:#b91c1c;}
 </style>
 </head>
 <body>
@@ -103,7 +127,9 @@
     const ADMIN_PASS = '123';
     const MAX_ATTEMPTS = 3;
 
-    // ---------- Helpers ----------
+    let adminAttempts = 0;
+
+    // ---------- Helper functions ----------
     function getAccounts(){
         const raw = localStorage.getItem(ACCOUNTS_KEY);
         if(!raw){
@@ -113,4 +139,119 @@
         }
         return JSON.parse(raw);
     }
-    function saveAccounts(arr){ localStorage
+    function saveAccounts(arr){ localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(arr)); }
+    function getBalances(){ return JSON.parse(localStorage.getItem(BALANCES_KEY) || '{}'); }
+    function saveBalances(obj){ localStorage.setItem(BALANCES_KEY, JSON.stringify(obj)); }
+
+    function showPopup(el){ el.classList.add('active'); }
+    function hidePopup(el){ el.classList.remove('active'); }
+    function showMsg(el, text, isSuccess){
+        el.textContent = text;
+        el.className = 'msg ' + (isSuccess ? 'success' : 'error');
+    }
+
+    // ---------- Render accounts (dropdown + table) ----------
+    function renderAccounts(){
+        const accounts = getAccounts();
+        const balances = getBalances();
+
+        const select = document.getElementById('userSelect');
+        select.innerHTML = ''; // clear
+        accounts.forEach(acc => {
+            const opt = document.createElement('option');
+            opt.value = acc.username;
+            opt.textContent = `${acc.name} (${acc.username})`;
+            select.appendChild(opt);
+        });
+
+        const tbody = document.querySelector('#accountsTable tbody');
+        tbody.innerHTML = '';
+        accounts.forEach(acc => {
+            const row = document.createElement('tr');
+            const bal = balances[acc.username] !== undefined ? balances[acc.username] : 0;
+            row.innerHTML = `
+                <td>${acc.name}</td>
+                <td>${acc.age}</td>
+                <td>${acc.username}</td>
+                <td>$${bal.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // ---------- Admin login ----------
+    const loginForm = document.getElementById('loginForm');
+    const adminUI   = document.getElementById('adminUI');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const errorPopup = document.getElementById('errorPopup');
+    const errorOkay   = document.getElementById('errorOkay');
+
+    adminLoginBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        const user = document.getElementById('adminUser').value.trim();
+        const pass = document.getElementById('adminPass').value;
+
+        if(user===ADMIN_USER && pass===ADMIN_PASS){
+            // Successful login
+            loginForm.style.display = 'none';
+            adminUI.style.display   = 'block';
+            adminAttempts = 0; // reset counter
+            renderAccounts();   // populate UI
+        }else{
+            adminAttempts++;
+            if(adminAttempts >= MAX_ATTEMPTS){
+                // Lockout after 3 tries
+                loginForm.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+                showMsg(document.getElementById('adminMsg'), 
+                        'Maximum attempts reached. Kindly login after sometime due to security reasons.',false);
+            }else{
+                showPopup(errorPopup);
+            }
+        }
+    });
+
+    // ---------- Error popup handling ----------
+    errorOkay.addEventListener('click',()=>{
+        hidePopup(errorPopup);
+        // clear fields for next try
+        document.getElementById('adminUser').value = '';
+        document.getElementById('adminPass').value = '';
+    });
+    document.addEventListener('keydown',e=>{
+        if(e.key==='Escape') hidePopup(errorPopup);
+    });
+    errorPopup.addEventListener('click',e=>{ if(e.target===errorPopup) hidePopup(errorPopup); });
+
+    // ---------- Balance update ----------
+    const changeBalBtn = document.getElementById('changeBalBtn');
+    const newBalInput  = document.getElementById('newBal');
+    const adminMsg     = document.getElementById('adminMsg');
+
+    changeBalBtn.addEventListener('click',()=>{
+        const selectedUser = document.getElementById('userSelect').value;
+        const valStr       = newBalInput.value.trim();
+        if(selectedUser === ''){
+            showMsg(adminMsg,'Please select a user.',false);
+            return;
+        }
+        if(valStr === ''){
+            showMsg(adminMsg,'Please enter a balance.',false);
+            return;
+        }
+        const val = parseFloat(valStr);
+        if(isNaN(val) || val < 0){
+            showMsg(adminMsg,'Please enter a valid non‑negative number.',false);
+            return;
+        }
+        // Update balance
+        const balances = getBalances();
+        balances[selectedUser] = val;
+        saveBalances(balances);
+        showMsg(adminMsg,'Balance updated successfully!',true);
+        newBalInput.value = '';
+        // Refresh table to show new balance
+        renderAccounts();
+    });
+</script>
+</body>
+</html>
