@@ -11,8 +11,6 @@
     .bank-logo{font-size:2.5rem;color:#2563eb;margin-bottom:1.5rem;}
     h1{color:#1e293b;margin-bottom:1rem;}
     p{color:#64748b;line-height:1.6;margin-bottom:1.5rem;}
-
-    /* ----- Top‑right auth button ----- */
     #authBtn{
         position:fixed;top:1rem;right:1rem;
         padding:.5rem 1rem;border:none;border-radius:6px;
@@ -23,8 +21,6 @@
     #authBtn.sign-in:hover{background:#1d4ed8;}
     #authBtn.log-out{background:#dc2626;}
     #authBtn.log-out:hover{background:#b91c1c;}
-
-    /* ----- Popup overlay (welcome & error) ----- */
     .popup-overlay{
         position:fixed;inset:0;background:rgba(0,0,0,.5);
         display:flex;justify-content:center;align-items:center;
@@ -48,7 +44,6 @@
         transition:background .2s ease;font-weight:500;
     }
     .popup-btn:hover{background:#1d4ed8;}
-    /* ----- Responsive ----- */
     @media(max-width:480px){
         .bank-container{padding:1.5rem;}
         .popup-content{padding:2rem;}
@@ -57,7 +52,6 @@
 </head>
 <body>
 
-<!-- Top‑right auth button -->
 <button id="authBtn" class="sign-in">Sign In</button>
 
 <div class="bank-container">
@@ -67,7 +61,6 @@
     <p>Dummy banking interface for demonstration purposes</p>
 </div>
 
-<!-- Welcome Popup -->
 <div class="popup-overlay" id="welcomePopup">
     <div class="popup-content">
         <div class="popup-icon">👋</div>
@@ -78,27 +71,22 @@
 </div>
 
 <script>
-    // ---------- State helpers ----------
     const STORAGE_KEY = 'sbLoggedIn';
     function isLoggedIn(){ return localStorage.getItem(STORAGE_KEY) === 'true'; }
     function setLoggedIn(v){ localStorage.setItem(STORAGE_KEY, v); }
     function clearLogin(){ localStorage.removeItem(STORAGE_KEY); }
 
-    // ---------- Popup helpers ----------
     function showPopup(el){ el.classList.add('active'); }
     function hidePopup(el){ el.classList.remove('active'); }
 
-    // ---------- Welcome popup ----------
     document.addEventListener('DOMContentLoaded',()=>{
         const welcomePopup = document.getElementById('welcomePopup');
         const thanksBtn    = document.getElementById('thanksBtn');
         const authBtn      = document.getElementById('authBtn');
 
         setTimeout(()=>showPopup(welcomePopup),300);
-
         thanksBtn.addEventListener('click',()=>{ hidePopup(welcomePopup); });
 
-        // Optional: close on ESC or clicking outside
         document.addEventListener('keydown',e=>{
             if(e.key==='Escape'){
                 [welcomePopup].forEach(p=>hidePopup(p));
@@ -106,7 +94,6 @@
         });
         welcomePopup.addEventListener('click',e=>{ if(e.target===welcomePopup) hidePopup(welcomePopup); });
 
-        // ---------- Auth button logic ----------
         function updateAuthBtn(){
             if(isLoggedIn()){
                 authBtn.textContent = 'Log Out';
@@ -122,14 +109,12 @@
             if(isLoggedIn()){
                 clearLogin();
                 updateAuthBtn();
-                // If you land on home.html while already logged‑in, go to dashboard
                 window.location.href = 'dashboard.html';
             }else{
                 window.location.href = 'signin.html';
             }
         });
 
-        // If the user somehow arrives here already logged in, send them to dashboard
         if(isLoggedIn()){
             window.location.href = 'dashboard.html';
         }
