@@ -26,7 +26,6 @@
         text-align:center;color:#64748b;
     }
     main p{font-size:1.2rem;}
-    .hint{margin-top:1rem;font-size:.9rem;color:#6b7280;}
 </style>
 </head>
 <body>
@@ -41,31 +40,27 @@
 
 <main>
     <p>This is your dashboard. You can add more banking features here.</p>
-    <p class="hint">(Balance can be changed via the admin page.)</p>
 </main>
 
 <script>
-    // Storage keys used throughout the demo
     const LOGGED_KEY   = 'sbLoggedIn';
     const CURRENT_KEY  = 'sbCurrentUser';
     const BALANCES_KEY = 'sbUserBalances';
 
-    // Helper functions
     function isLoggedIn(){ return localStorage.getItem(LOGGED_KEY) === 'true'; }
     function clearLogin(){
         localStorage.removeItem(LOGGED_KEY);
         localStorage.removeItem(CURRENT_KEY);
     }
 
-    // Run after the DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
-        // If the user isn’t logged in, send them home
+        // If not logged in → go home
         if (!isLoggedIn()) {
             window.location.href = 'index.html';
             return;
         }
 
-        // Populate welcome info
+        // Show welcome info
         const username = localStorage.getItem(CURRENT_KEY);
         const balances = JSON.parse(localStorage.getItem(BALANCES_KEY) || '{}');
         const balance  = typeof balances[username] === 'number' ? balances[username] : 0;
@@ -73,10 +68,9 @@
         document.getElementById('userName').textContent = username;
         document.getElementById('userBalance').textContent = `$${balance.toFixed(2)}`;
 
-        // Log‑out button handler
-        const logoutBtn = document.getElementById('logoutBtn');
-        logoutBtn.addEventListener('click', () => {
-            clearLogin();               // remove login flag & current user
+        // Log‑out button
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            clearLogin();
             window.location.href = 'index.html';
         });
     });
